@@ -4,15 +4,16 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-  "test": "jest",
-  "dev": "npx nodemon",
-  "build": "tsc",
-  "prepare": "husky install"
+    "test": "jest",
+    "dev": "npx nodemon",
+    "build": "tsc",
+    "prepare": "husky install"
   },
   "author": "Rycherd",
   "license": "ISC",
   "devDependencies": {
     "husky": "^8.0.3",
+    "prettier": "^3.0.2",
     "prisma": "^5.1.1",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
