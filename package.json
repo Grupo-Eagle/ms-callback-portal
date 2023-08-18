@@ -12,6 +12,7 @@
   "author": "Rycherd",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^20.5.0",
     "husky": "^8.0.3",
     "prettier": "^3.0.2",
     "prisma": "^5.1.1",
