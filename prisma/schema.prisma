@@ -6,3 +6,905 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+
+model callback_fila {
+  id                        BigInt                    @id @default(autoincrement())
+  user_create_id            Int
+  linha_id                  BigInt
+  user_update_id            Int?
+  user_delete_id            Int?
+  created_at                DateTime                  @default(now()) @db.DateTime(0)
+  updated_at                DateTime?                 @db.DateTime(0)
+  deleted_at                DateTime?                 @db.DateTime(0)
+  arquivo_id                BigInt
+  status_id                 BigInt
+  tentativas_de_retorno     Int?                      @default(0)
+  system_users              system_users              @relation(fields: [user_create_id], references: [id], onUpdate: Restrict, map: "fk_callback_fila_1_1")
+  status                    status                    @relation(fields: [status_id], references: [id], onUpdate: Restrict, map: "fk_callback_fila_4_1")
+  importacao_arquivos       importacao_arquivos       @relation(fields: [arquivo_id], references: [id], onUpdate: Restrict, map: "fk_callback_fila_arquivo_id")
+  importacao_linhas_arquivo importacao_linhas_arquivo @relation(fields: [linha_id], references: [id], onUpdate: Restrict, map: "fk_callback_fila_linha_id")
+
+  @@index([user_create_id], map: "fk_callback_fila_1_1")
+  @@index([arquivo_id], map: "fk_callback_fila_arquivo_id")
+  @@index([linha_id], map: "fk_callback_fila_linha_id")
+  @@index([status_id], map: "fk_callback_fila_4_1")
+}
+
+model chamados {
+  id                                                 Int                       @id @default(autoincrement())
+  user_create_id                                     Int
+  user_update_id                                     Int?
+  user_delete_id                                     Int?
+  solicitante_id                                     Int
+  grupo_id                                           Int
+  categoria_id                                       Int
+  status_id                                          BigInt
+  prioridade_id                                      Int
+  atendente_id                                       Int?
+  tipo_problema_id                                   Int?
+  tipo_solucao_id                                    Int?
+  assunto_id                                         Int?
+  observacao_abertura                                String                    @db.Text
+  dt_abertura                                        DateTime                  @default(now()) @db.DateTime(0)
+  dt_fechamento                                      DateTime?                 @db.DateTime(0)
+  observacao_finalizacao                             String?                   @db.Text
+  tempo_trabalho                                     DateTime?                 @db.Time(0)
+  recorente                                          String?                   @default("F") @db.Char(1)
+  mes_abertura                                       String?                   @db.Text
+  ano_abertura                                       String?                   @db.Text
+  anomes_abertura                                    String?                   @db.Text
+  ano_fechamento                                     String?                   @db.Text
+  mes_fechamento                                     String?                   @db.Text
+  anomes_fechamento                                  Int?
+  created_at                                         DateTime?                 @default(now()) @db.DateTime(0)
+  updated_at                                         DateTime?                 @db.DateTime(0)
+  deleted_at                                         DateTime?                 @db.DateTime(0)
+  chamados_atendentes                                chamados_atendentes?      @relation(fields: [atendente_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_chamado_2_7")
+  chamados_tipos_problemas                           chamados_tipos_problemas? @relation(fields: [tipo_problema_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_chamado_4_8")
+  chamados_tipos_solucoes                            chamados_tipos_solucoes?  @relation(fields: [tipo_solucao_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_chamado_5_9")
+  chamados_categorias                                chamados_categorias       @relation(fields: [categoria_id], references: [id], onUpdate: Restrict, map: "fk_chamado_7_10")
+  chamados_prioridades                               chamados_prioridades      @relation(fields: [prioridade_id], references: [id], onUpdate: Restrict, map: "fk_chamado_8_11")
+  system_users_chamados_user_delete_idTosystem_users system_users?             @relation("chamados_user_delete_idTosystem_users", fields: [user_delete_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_chamados_10_5")
+  system_group                                       system_group              @relation(fields: [grupo_id], references: [id], onUpdate: Restrict, map: "fk_chamados_11_1")
+  status                                             status                    @relation(fields: [status_id], references: [id], onUpdate: Restrict, map: "fk_chamados_11_3")
+  system_users_chamados_solicitante_idTosystem_users system_users              @relation("chamados_solicitante_idTosystem_users", fields: [solicitante_id], references: [id], onUpdate: Restrict, map: "fk_chamados_11_6")
+  chamados_assuntos                                  chamados_assuntos?        @relation(fields: [assunto_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_chamados_12_12")
+  system_users_chamados_user_create_idTosystem_users system_users              @relation("chamados_user_create_idTosystem_users", fields: [user_create_id], references: [id], onUpdate: Restrict, map: "fk_chamados_8_2")
+  system_users_chamados_user_update_idTosystem_users system_users?             @relation("chamados_user_update_idTosystem_users", fields: [user_update_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_chamados_9_4")
+  chamados_arquivos                                  chamados_arquivos[]
+  chamados_notas                                     chamados_notas[]
+
+  @@index([atendente_id], map: "fk_chamado_2_7")
+  @@index([tipo_problema_id], map: "fk_chamado_4_8")
+  @@index([tipo_solucao_id], map: "fk_chamado_5_9")
+  @@index([categoria_id], map: "fk_chamado_7_10")
+  @@index([prioridade_id], map: "fk_chamado_8_11")
+  @@index([user_delete_id], map: "fk_chamados_10_5")
+  @@index([grupo_id], map: "fk_chamados_11_1")
+  @@index([status_id], map: "fk_chamados_11_3")
+  @@index([solicitante_id], map: "fk_chamados_11_6")
+  @@index([assunto_id], map: "fk_chamados_12_12")
+  @@index([user_create_id], map: "fk_chamados_8_2")
+  @@index([user_update_id], map: "fk_chamados_9_4")
+}
+
+model chamados_arquivos {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.Text
+  chamado_id Int
+  created_at DateTime? @default(now()) @db.DateTime(0)
+  updated_at DateTime? @db.DateTime(0)
+  deleted_at DateTime? @db.DateTime(0)
+  chamados   chamados  @relation(fields: [chamado_id], references: [id], onUpdate: Restrict, map: "fk_arquivo_chamado_1_1")
+
+  @@index([chamado_id], map: "fk_arquivo_chamado_1_1")
+}
+
+model chamados_assuntos {
+  id                         Int                          @id @default(autoincrement())
+  nome                       String                       @db.Text
+  ativo                      String                       @default("T") @db.Char(1)
+  created_at                 DateTime?                    @default(now()) @db.DateTime(0)
+  updated_at                 DateTime?                    @db.DateTime(0)
+  deleted_at                 DateTime?                    @db.DateTime(0)
+  chamados                   chamados[]
+  chamados_clientes_produtos chamados_clientes_produtos[]
+}
+
+model chamados_atendentes {
+  id             Int              @id @default(autoincrement())
+  system_user_id Int
+  created_at     DateTime?        @default(now()) @db.DateTime(0)
+  updated_at     DateTime?        @db.DateTime(0)
+  deleted_at     DateTime?        @db.DateTime(0)
+  chamados       chamados[]
+  system_users   system_users     @relation(fields: [system_user_id], references: [id], onUpdate: Restrict, map: "fk_atendente_1_1")
+  chamados_notas chamados_notas[]
+
+  @@index([system_user_id], map: "fk_atendente_1_1")
+}
+
+model chamados_categorias {
+  id         Int        @id @default(autoincrement())
+  nome       String     @db.Text
+  email      String     @db.Text
+  descricao  String?    @db.Text
+  created_at DateTime?  @default(now()) @db.DateTime(0)
+  updated_at DateTime?  @db.DateTime(0)
+  deleted_at DateTime?  @db.DateTime(0)
+  chamados   chamados[]
+}
+
+model chamados_clientes {
+  id                         Int                          @id @default(autoincrement())
+  segmento_id                Int
+  system_user_id             Int
+  created_at                 DateTime?                    @default(now()) @db.DateTime(0)
+  updated_at                 DateTime?                    @db.DateTime(0)
+  deleted_at                 DateTime?                    @db.DateTime(0)
+  chamados_clientes_produtos chamados_clientes_produtos[]
+}
+
+model chamados_clientes_produtos {
+  id                Int               @id @default(autoincrement())
+  produto_id        Int
+  cliente_id        Int
+  created_at        DateTime?         @default(now()) @db.DateTime(0)
+  updated_at        DateTime?         @db.DateTime(0)
+  deleted_at        DateTime?         @db.DateTime(0)
+  chamados_assuntos chamados_assuntos @relation(fields: [produto_id], references: [id], onUpdate: Restrict, map: "fk_cliente_produto_1_1")
+  chamados_clientes chamados_clientes @relation(fields: [cliente_id], references: [id], onUpdate: Restrict, map: "fk_cliente_produto_2_2")
+
+  @@index([produto_id], map: "fk_cliente_produto_1_1")
+  @@index([cliente_id], map: "fk_cliente_produto_2_2")
+}
+
+model chamados_notas {
+  id                                                       Int                  @id @default(autoincrement())
+  user_delete_id                                           Int?
+  user_update_id                                           Int?
+  user_create_id                                           Int
+  chamado_id                                               Int
+  solicitante_id                                           Int?
+  atendente_id                                             Int?
+  observacao                                               String               @db.Text
+  anexo                                                    String?              @db.Text
+  created_at                                               DateTime?            @default(now()) @db.DateTime(0)
+  updated_at                                               DateTime?            @db.DateTime(0)
+  deleted_at                                               DateTime?            @db.DateTime(0)
+  system_users_chamados_notas_solicitante_idTosystem_users system_users?        @relation("chamados_notas_solicitante_idTosystem_users", fields: [solicitante_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_chamados_notas_3_4")
+  system_users_chamados_notas_user_delete_idTosystem_users system_users?        @relation("chamados_notas_user_delete_idTosystem_users", fields: [user_delete_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_chamados_notas_4_1")
+  system_users_chamados_notas_user_update_idTosystem_users system_users?        @relation("chamados_notas_user_update_idTosystem_users", fields: [user_update_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_chamados_notas_5_2")
+  system_users_chamados_notas_user_create_idTosystem_users system_users         @relation("chamados_notas_user_create_idTosystem_users", fields: [user_create_id], references: [id], onUpdate: Restrict, map: "fk_chamados_notas_6_3")
+  chamados                                                 chamados             @relation(fields: [chamado_id], references: [id], onUpdate: Restrict, map: "fk_nota_1_5")
+  chamados_atendentes                                      chamados_atendentes? @relation(fields: [atendente_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_nota_3_6")
+
+  @@index([solicitante_id], map: "fk_chamados_notas_3_4")
+  @@index([user_delete_id], map: "fk_chamados_notas_4_1")
+  @@index([user_update_id], map: "fk_chamados_notas_5_2")
+  @@index([user_create_id], map: "fk_chamados_notas_6_3")
+  @@index([chamado_id], map: "fk_nota_1_5")
+  @@index([atendente_id], map: "fk_nota_3_6")
+}
+
+model chamados_prioridades {
+  id         Int        @id @default(autoincrement())
+  nome       String     @db.Text
+  cor        String     @db.Text
+  ordem      Int?
+  created_at DateTime?  @default(now()) @db.DateTime(0)
+  updated_at DateTime?  @db.DateTime(0)
+  deleted_at DateTime?  @db.DateTime(0)
+  chamados   chamados[]
+}
+
+model chamados_templates {
+  id         Int       @id @default(autoincrement())
+  chave      String    @unique(map: "chave") @db.VarChar(255)
+  template   String    @db.Text
+  titulo     String    @db.Text
+  created_at DateTime? @default(now()) @db.DateTime(0)
+  updated_at DateTime? @db.DateTime(0)
+  deleted_at DateTime? @db.DateTime(0)
+}
+
+model chamados_tipos_problemas {
+  id         Int        @id @default(autoincrement())
+  nome       String     @db.Text
+  ativo      String     @default("T") @db.Char(1)
+  created_at DateTime?  @default(now()) @db.DateTime(0)
+  updated_at DateTime?  @db.DateTime(0)
+  deleted_at DateTime?  @db.DateTime(0)
+  chamados   chamados[]
+}
+
+model chamados_tipos_solucoes {
+  id         Int        @id @default(autoincrement())
+  nome       String     @db.Text
+  ativo      String     @default("T") @db.Char(1)
+  created_at DateTime?  @default(now()) @db.DateTime(0)
+  updated_at DateTime?  @db.DateTime(0)
+  deleted_at DateTime?  @db.DateTime(0)
+  chamados   chamados[]
+}
+
+model cidades {
+  id                                                BigInt        @id @default(autoincrement())
+  user_create_id                                    Int
+  user_update_id                                    Int?
+  user_delete_id                                    Int?
+  uf_id                                             BigInt
+  nome                                              String        @db.VarChar(50)
+  created_at                                        DateTime      @default(now()) @db.DateTime(0)
+  updated_at                                        DateTime?     @db.DateTime(0)
+  deleted_at                                        DateTime?     @db.DateTime(0)
+  ufs                                               ufs           @relation(fields: [uf_id], references: [id], onUpdate: Restrict, map: "fk_cidades_uf_id")
+  system_users_cidades_user_create_idTosystem_users system_users  @relation("cidades_user_create_idTosystem_users", fields: [user_create_id], references: [id], onUpdate: Restrict, map: "fk_cidades_user_create_id")
+  system_users_cidades_user_delete_idTosystem_users system_users? @relation("cidades_user_delete_idTosystem_users", fields: [user_delete_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_cidades_user_delete_id")
+  system_users_cidades_user_update_idTosystem_users system_users? @relation("cidades_user_update_idTosystem_users", fields: [user_update_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_cidades_user_update_id")
+  enderecos                                         enderecos[]
+
+  @@index([uf_id], map: "fk_cidades_uf_id")
+  @@index([user_create_id], map: "fk_cidades_user_create_id")
+  @@index([user_delete_id], map: "fk_cidades_user_delete_id")
+  @@index([user_update_id], map: "fk_cidades_user_update_id")
+}
+
+model correspondentes {
+  id                                                        BigInt                          @id @default(autoincrement())
+  user_create_id                                            Int
+  user_update_id                                            Int?
+  user_delete_id                                            Int?
+  endereco_id                                               BigInt?
+  nome                                                      String                          @db.VarChar(255)
+  nivel_prioridade                                          Int                             @default(5)
+  cnpj                                                      String                          @unique(map: "cnpj") @db.VarChar(14)
+  chave                                                     String?                         @db.VarChar(50)
+  created_at                                                DateTime                        @default(now()) @db.DateTime(0)
+  updated_at                                                DateTime?                       @db.DateTime(0)
+  deleted_at                                                DateTime?                       @db.DateTime(0)
+  razao_social                                              String                          @db.VarChar(255)
+  email                                                     String?                         @db.VarChar(255)
+  status                                                    Boolean                         @default(true)
+  enderecos                                                 enderecos?                      @relation(fields: [endereco_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_correspondentes_endereco_id")
+  system_users_correspondentes_user_create_idTosystem_users system_users                    @relation("correspondentes_user_create_idTosystem_users", fields: [user_create_id], references: [id], onUpdate: Restrict, map: "fk_correspondentes_user_create_id")
+  system_users_correspondentes_user_delete_idTosystem_users system_users?                   @relation("correspondentes_user_delete_idTosystem_users", fields: [user_delete_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_correspondentes_user_delete_id")
+  system_users_correspondentes_user_update_idTosystem_users system_users?                   @relation("correspondentes_user_update_idTosystem_users", fields: [user_update_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_correspondentes_user_update_id")
+  correspondentes_vinculos_user                             correspondentes_vinculos_user[]
+  importacao_arquivos                                       importacao_arquivos[]
+
+  @@index([endereco_id], map: "fk_correspondentes_endereco_id")
+  @@index([user_create_id], map: "fk_correspondentes_user_create_id")
+  @@index([user_delete_id], map: "fk_correspondentes_user_delete_id")
+  @@index([user_update_id], map: "fk_correspondentes_user_update_id")
+}
+
+model correspondentes_vinculos_user {
+  id                                                                      BigInt           @id @default(autoincrement())
+  user_id                                                                 Int?             @unique(map: "user_id")
+  user_create_id                                                          Int
+  user_update_id                                                          Int?
+  user_delete_id                                                          Int?
+  correspondente_id                                                       BigInt?
+  created_at                                                              DateTime         @default(now()) @db.DateTime(0)
+  updated_at                                                              DateTime?        @db.DateTime(0)
+  deleted_at                                                              DateTime?        @db.DateTime(0)
+  grupo_id                                                                Int?
+  nascimento                                                              DateTime?        @db.Date
+  aprovador_status                                                        Boolean?
+  aprovador_demanda                                                       Boolean?
+  endpoint_retorno_negocios                                               String?          @db.VarChar(500)
+  system_group                                                            system_group?    @relation(fields: [grupo_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_correspondentes_vinculos_user_6_1")
+  correspondentes                                                         correspondentes? @relation(fields: [correspondente_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_correspondentes_vinculos_user_correspondente_id")
+  system_users_correspondentes_vinculos_user_user_create_idTosystem_users system_users     @relation("correspondentes_vinculos_user_user_create_idTosystem_users", fields: [user_create_id], references: [id], onUpdate: Restrict, map: "fk_correspondentes_vinculos_user_user_create_id")
+  system_users_correspondentes_vinculos_user_user_delete_idTosystem_users system_users?    @relation("correspondentes_vinculos_user_user_delete_idTosystem_users", fields: [user_delete_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_correspondentes_vinculos_user_user_delete_id")
+  system_users_correspondentes_vinculos_user_user_idTosystem_users        system_users?    @relation("correspondentes_vinculos_user_user_idTosystem_users", fields: [user_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_correspondentes_vinculos_user_user_id")
+  system_users_correspondentes_vinculos_user_user_update_idTosystem_users system_users?    @relation("correspondentes_vinculos_user_user_update_idTosystem_users", fields: [user_update_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_correspondentes_vinculos_user_user_update_id")
+
+  @@index([grupo_id], map: "fk_correspondentes_vinculos_user_6_1")
+  @@index([correspondente_id], map: "fk_correspondentes_vinculos_user_correspondente_id")
+  @@index([user_create_id], map: "fk_correspondentes_vinculos_user_user_create_id")
+  @@index([user_delete_id], map: "fk_correspondentes_vinculos_user_user_delete_id")
+  @@index([user_update_id], map: "fk_correspondentes_vinculos_user_user_update_id")
+}
+
+model enderecos {
+  id                                                  BigInt            @id @default(autoincrement())
+  user_create_id                                      Int
+  user_update_id                                      Int?
+  user_delete_id                                      Int?
+  cidade_id                                           BigInt
+  estado_id                                           BigInt
+  cep                                                 String            @db.VarChar(8)
+  rua                                                 String?           @db.VarChar(255)
+  numero                                              Int?
+  complemento                                         String?           @db.VarChar(100)
+  bairro                                              String?           @db.VarChar(50)
+  created_at                                          DateTime          @default(now()) @db.DateTime(0)
+  updated_at                                          DateTime?         @db.DateTime(0)
+  deleted_at                                          DateTime?         @db.DateTime(0)
+  correspondentes                                     correspondentes[]
+  cidades                                             cidades           @relation(fields: [cidade_id], references: [id], onUpdate: Restrict, map: "fk_enderecos_cidade_id")
+  ufs                                                 ufs               @relation(fields: [estado_id], references: [id], onUpdate: Restrict, map: "fk_enderecos_estado_id")
+  system_users_enderecos_user_create_idTosystem_users system_users      @relation("enderecos_user_create_idTosystem_users", fields: [user_create_id], references: [id], onUpdate: Restrict, map: "fk_enderecos_user_create_id")
+  system_users_enderecos_user_delete_idTosystem_users system_users?     @relation("enderecos_user_delete_idTosystem_users", fields: [user_delete_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_enderecos_user_delete_id")
+  system_users_enderecos_user_update_idTosystem_users system_users?     @relation("enderecos_user_update_idTosystem_users", fields: [user_update_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_enderecos_user_update_id")
+
+  @@index([cidade_id], map: "fk_enderecos_cidade_id")
+  @@index([estado_id], map: "fk_enderecos_estado_id")
+  @@index([user_create_id], map: "fk_enderecos_user_create_id")
+  @@index([user_delete_id], map: "fk_enderecos_user_delete_id")
+  @@index([user_update_id], map: "fk_enderecos_user_update_id")
+}
+
+model importacao_arquivos {
+  id                                                            BigInt                          @id @default(autoincrement())
+  user_create_id                                                Int
+  user_update_id                                                Int?
+  user_delete_id                                                Int?
+  nome                                                          String?                         @db.VarChar(512)
+  status_id                                                     BigInt
+  arquivo                                                       Bytes?
+  total_linhas                                                  Int?
+  linhas_validas                                                Int?
+  linhas_invalidas                                              Int?
+  linhas_erros                                                  Int?
+  linhas_processadas                                            Int?
+  linhas_nao_processadas                                        Int?
+  linhas_avisos                                                 Int?
+  hora_solicitada_validar                                       DateTime?                       @db.DateTime(0)
+  hora_inicio_validar                                           DateTime?                       @db.DateTime(0)
+  hora_solicitada_processar                                     DateTime?                       @db.DateTime(0)
+  hora_inicio_processar                                         DateTime?                       @db.DateTime(0)
+  hora_fim_processar                                            DateTime?                       @db.DateTime(0)
+  hora_fim_validar                                              DateTime?                       @db.DateTime(0)
+  created_at                                                    DateTime?                       @default(now()) @db.DateTime(0)
+  deleted_at                                                    DateTime?                       @db.DateTime(0)
+  updated_at                                                    DateTime?                       @db.DateTime(0)
+  correspondente_id                                             BigInt
+  origem_id                                                     BigInt
+  grupo_id                                                      Int?
+  hora_inicio_revalidar                                         DateTime?                       @db.DateTime(0)
+  hora_fim_revalidar                                            DateTime?                       @db.DateTime(0)
+  atualizacao                                                   Boolean                         @default(false)
+  callback_fila                                                 callback_fila[]
+  system_users_importacao_arquivos_user_create_idTosystem_users system_users                    @relation("importacao_arquivos_user_create_idTosystem_users", fields: [user_create_id], references: [id], onUpdate: Restrict, map: "fk_importacao_arquivos_1_1")
+  system_users_importacao_arquivos_user_update_idTosystem_users system_users?                   @relation("importacao_arquivos_user_update_idTosystem_users", fields: [user_update_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_importacao_arquivos_2_2")
+  status                                                        status                          @relation(fields: [status_id], references: [id], onUpdate: Restrict, map: "fk_importacao_arquivos_3_3")
+  parametros                                                    parametros                      @relation(fields: [origem_id], references: [id], onUpdate: Restrict, map: "fk_importacao_arquivos_5_1")
+  system_group                                                  system_group?                   @relation(fields: [grupo_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_importacao_arquivos_6_1")
+  correspondentes                                               correspondentes                 @relation(fields: [correspondente_id], references: [id], onUpdate: Restrict, map: "fk_importacao_arquivos_correspondente_id")
+  importacao_arquivos_inativado                                 importacao_arquivos_inativado[]
+  importacao_linhas_arquivo                                     importacao_linhas_arquivo[]
+
+  @@index([user_create_id], map: "fk_importacao_arquivos_1_1")
+  @@index([user_update_id], map: "fk_importacao_arquivos_2_2")
+  @@index([status_id], map: "fk_importacao_arquivos_3_3")
+  @@index([origem_id], map: "fk_importacao_arquivos_5_1")
+  @@index([grupo_id], map: "fk_importacao_arquivos_6_1")
+  @@index([correspondente_id], map: "fk_importacao_arquivos_correspondente_id")
+}
+
+model importacao_arquivos_inativado {
+  id                         BigInt                       @id @default(autoincrement())
+  total_linhas               Int
+  arquivo_id                 BigInt
+  created_at                 DateTime?                    @default(now()) @db.DateTime(0)
+  updated_at                 DateTime?                    @db.DateTime(0)
+  deleted_at                 DateTime?                    @db.DateTime(0)
+  importacao_arquivos        importacao_arquivos          @relation(fields: [arquivo_id], references: [id], onUpdate: Restrict, map: "fk_importacao_arquivos_inativado_arquivo_id")
+  importacao_linhas_inativas importacao_linhas_inativas[]
+
+  @@index([arquivo_id], map: "fk_importacao_arquivos_inativado_arquivo_id")
+}
+
+model importacao_erros {
+  id                     BigInt                   @id @default(autoincrement())
+  user_create_id         Int
+  user_update_id         Int?
+  descricao              String                   @db.VarChar(255)
+  critico                Boolean                  @default(false)
+  chave                  String                   @unique(map: "chave") @db.VarChar(100)
+  created_at             DateTime                 @default(now()) @db.DateTime(0)
+  updated_at             DateTime?                @db.DateTime(0)
+  deleted_at             DateTime?                @db.DateTime(0)
+  cor_hexa               String                   @default("#FFA500") @db.VarChar(7)
+  importacao_erros_linha importacao_erros_linha[]
+}
+
+model importacao_erros_linha {
+  id                        BigInt                    @id @default(autoincrement())
+  erro_id                   BigInt
+  linha_id                  BigInt
+  user_update_id            Int?
+  user_create_id            Int?
+  created_at                DateTime                  @default(now()) @db.DateTime(0)
+  updated_at                DateTime?                 @db.DateTime(0)
+  deleted_at                DateTime?                 @db.DateTime(0)
+  importacao_erros          importacao_erros          @relation(fields: [erro_id], references: [id], onUpdate: Restrict, map: "fk_importacao_erros_linha_erro_id")
+  importacao_linhas_arquivo importacao_linhas_arquivo @relation(fields: [linha_id], references: [id], onUpdate: Restrict, map: "fk_importacao_erros_linha_linha_id")
+
+  @@index([erro_id], map: "fk_importacao_erros_linha_erro_id")
+  @@index([linha_id], map: "fk_importacao_erros_linha_linha_id")
+}
+
+model importacao_linhas_arquivo {
+  id                                                                  BigInt                   @id @default(autoincrement())
+  user_create_id                                                      Int?
+  user_update_id                                                      Int?
+  user_delete_id                                                      Int?
+  arquivo_id                                                          BigInt
+  oferta_codigo_id                                                    BigInt?
+  status_id                                                           BigInt?
+  origem_id                                                           BigInt?
+  vendedor_id                                                         BigInt?
+  endereco_cidade_id                                                  BigInt?
+  endereco_uf_id                                                      Int?
+  banco_id                                                            BigInt?
+  numero_linha                                                        Int
+  cpf                                                                 String?                  @db.VarChar(20)
+  nome                                                                String?                  @db.VarChar(255)
+  sobrenome                                                           String?                  @db.VarChar(255)
+  data_nascimento                                                     String?                  @db.VarChar(30)
+  email                                                               String?                  @db.VarChar(255)
+  estado_civil                                                        String?                  @db.VarChar(20)
+  telefone                                                            String?                  @db.VarChar(20)
+  telefone_2                                                          String?                  @db.VarChar(20)
+  cod_genero                                                          String?                  @db.VarChar(30)
+  cod_convenio                                                        String?                  @db.VarChar(20)
+  endereco_rua                                                        String?                  @db.VarChar(255)
+  endereco_complemento                                                String?                  @db.VarChar(255)
+  endereco_numero                                                     String?                  @db.VarChar(20)
+  endereco_bairro                                                     String?                  @db.VarChar(255)
+  endereco_cep                                                        String?                  @db.VarChar(20)
+  agencia_bancaria                                                    String?                  @db.VarChar(64)
+  conta_corrente                                                      String?                  @db.VarChar(50)
+  codigo_operacao                                                     String?                  @db.VarChar(50)
+  dia_debito                                                          String?                  @db.VarChar(20)
+  quantidade                                                          String?                  @default("1") @db.VarChar(20)
+  oferta_valor_unitario                                               String?                  @db.VarChar(20)
+  matricula                                                           String?                  @db.VarChar(20)
+  renda                                                               String?                  @db.VarChar(20)
+  created_at                                                          DateTime?                @default(now()) @db.DateTime(0)
+  updated_at                                                          DateTime?                @db.DateTime(0)
+  deleted_at                                                          DateTime?                @db.DateTime(0)
+  correspondente_erp_id                                               Int                      @default(0)
+  grupo_id                                                            Int?
+  calcular_dia_debito                                                 String                   @default("N") @db.VarChar(50)
+  external_id                                                         BigInt?
+  tipo_conta                                                          String?                  @db.VarChar(10)
+  dado_atualizado                                                     Boolean?                 @default(false)
+  callback_fila                                                       callback_fila[]
+  importacao_erros_linha                                              importacao_erros_linha[]
+  system_group                                                        system_group?            @relation(fields: [grupo_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_importacao_linhas_arquivo_5_1")
+  importacao_arquivos                                                 importacao_arquivos      @relation(fields: [arquivo_id], references: [id], onUpdate: Restrict, map: "fk_importacao_linhas_arquivo_arquivo_id")
+  status                                                              status?                  @relation(fields: [status_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_importacao_linhas_arquivo_status_id")
+  system_users_importacao_linhas_arquivo_user_create_idTosystem_users system_users?            @relation("importacao_linhas_arquivo_user_create_idTosystem_users", fields: [user_create_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_importacao_linhas_arquivo_user_create_id")
+  system_users_importacao_linhas_arquivo_user_update_idTosystem_users system_users?            @relation("importacao_linhas_arquivo_user_update_idTosystem_users", fields: [user_update_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_importacao_linhas_arquivo_user_update_id")
+
+  @@index([grupo_id], map: "fk_importacao_linhas_arquivo_5_1")
+  @@index([arquivo_id], map: "fk_importacao_linhas_arquivo_arquivo_id")
+  @@index([status_id], map: "fk_importacao_linhas_arquivo_status_id")
+  @@index([user_create_id], map: "fk_importacao_linhas_arquivo_user_create_id")
+  @@index([user_update_id], map: "fk_importacao_linhas_arquivo_user_update_id")
+  @@index([external_id], map: "idx_external_id")
+}
+
+model importacao_linhas_inativas {
+  id                                                                   BigInt                        @id @default(autoincrement())
+  arquivo_inativado_id                                                 BigInt
+  user_create_id                                                       Int
+  user_update_id                                                       Int?
+  cliente_id                                                           BigInt?
+  cliente_cpf                                                          String?                       @db.VarChar(20)
+  sem_cpf                                                              Boolean
+  status                                                               Boolean
+  created_at                                                           DateTime?                     @default(now()) @db.DateTime(0)
+  updated_at                                                           DateTime?                     @db.DateTime(0)
+  deleted_at                                                           DateTime?                     @db.DateTime(0)
+  importacao_arquivos_inativado                                        importacao_arquivos_inativado @relation(fields: [arquivo_inativado_id], references: [id], onUpdate: Restrict, map: "fk_importacao_linhas_inativas_arquivo_inativado_id")
+  system_users_importacao_linhas_inativas_user_create_idTosystem_users system_users                  @relation("importacao_linhas_inativas_user_create_idTosystem_users", fields: [user_create_id], references: [id], onUpdate: Restrict, map: "fk_importacao_linhas_inativas_user_create_id")
+  system_users_importacao_linhas_inativas_user_update_idTosystem_users system_users?                 @relation("importacao_linhas_inativas_user_update_idTosystem_users", fields: [user_update_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_importacao_linhas_inativas_user_update_id")
+
+  @@index([arquivo_inativado_id], map: "fk_importacao_linhas_inativas_arquivo_inativado_id")
+  @@index([user_create_id], map: "fk_importacao_linhas_inativas_user_create_id")
+  @@index([user_update_id], map: "fk_importacao_linhas_inativas_user_update_id")
+}
+
+model logs {
+  id                                             BigInt        @id @default(autoincrement())
+  atribuido_para                                 Int
+  user_create_id                                 Int
+  user_update_id                                 Int?
+  tipo_alteracao                                 String        @db.VarChar(60)
+  campos_alterados                               String?       @default("NULL") @db.VarChar(255)
+  entidade                                       String?       @default("NULL") @db.VarChar(60)
+  registro_erros                                 String?       @default("NULL") @db.VarChar(500)
+  created_at                                     DateTime      @default(now()) @db.DateTime(0)
+  updated_at                                     DateTime?     @db.DateTime(0)
+  deleted_at                                     DateTime?     @db.DateTime(0)
+  user_delete_id                                 Int?
+  system_users_logs_user_delete_idTosystem_users system_users? @relation("logs_user_delete_idTosystem_users", fields: [user_delete_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_logs_3_1")
+  system_users_logs_user_create_idTosystem_users system_users  @relation("logs_user_create_idTosystem_users", fields: [user_create_id], references: [id], onUpdate: Restrict, map: "fk_logs_user_create_id")
+  system_users_logs_user_update_idTosystem_users system_users? @relation("logs_user_update_idTosystem_users", fields: [user_update_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_logs_user_update_id")
+
+  @@index([user_delete_id], map: "fk_logs_3_1")
+  @@index([user_create_id], map: "fk_logs_user_create_id")
+  @@index([user_update_id], map: "fk_logs_user_update_id")
+}
+
+model mural_avisos {
+  id                         Int                          @id @default(autoincrement())
+  autor_id                   Int
+  status_id                  BigInt
+  categoria_publicacao_id    Int
+  grupo_id                   Int?
+  caminho_arquivo            String?                      @db.VarChar(512)
+  titulo                     String?                      @db.VarChar(255)
+  texto                      String?                      @db.Text
+  created_at                 DateTime                     @default(now()) @db.DateTime(0)
+  updated_at                 DateTime?                    @db.DateTime(0)
+  deleted_at                 DateTime?                    @db.DateTime(0)
+  system_users               system_users                 @relation(fields: [autor_id], references: [id], onUpdate: Restrict, map: "autor_id_2")
+  mural_avisos_categorias    mural_avisos_categorias      @relation(fields: [categoria_publicacao_id], references: [id], onUpdate: Restrict, map: "categoria_id_1")
+  status                     status                       @relation(fields: [status_id], references: [id], onUpdate: Restrict, map: "fk_mural_avisos_4_4")
+  system_group               system_group?                @relation(fields: [grupo_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "system_group_id_3")
+  mural_avisos_anexos        mural_avisos_anexos[]
+  mural_avisos_system_groups mural_avisos_system_groups[]
+
+  @@index([autor_id], map: "autor_id_2")
+  @@index([categoria_publicacao_id], map: "categoria_id_1")
+  @@index([status_id], map: "fk_mural_avisos_4_4")
+  @@index([grupo_id], map: "system_group_id_3")
+}
+
+model mural_avisos_anexos {
+  id            Int           @id @default(autoincrement())
+  publicacao_id Int?
+  caminho       String?       @db.VarChar(255)
+  created_at    DateTime      @default(now()) @db.DateTime(0)
+  updated_at    DateTime?     @db.DateTime(0)
+  deleted_at    DateTime?     @default(now()) @db.DateTime(0)
+  mural_avisos  mural_avisos? @relation(fields: [publicacao_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_anexo_publicacao_1_1")
+
+  @@index([publicacao_id], map: "fk_anexo_publicacao_1_1")
+}
+
+model mural_avisos_categorias {
+  id           Int            @id @default(autoincrement())
+  nome         String?        @db.VarChar(255)
+  created_at   DateTime       @default(now()) @db.DateTime(0)
+  updated_at   DateTime?      @db.DateTime(0)
+  deleted_at   DateTime?      @db.DateTime(0)
+  mural_avisos mural_avisos[]
+}
+
+model mural_avisos_system_groups {
+  id                                                                   Int           @id @default(autoincrement())
+  mural_avisos_id                                                      Int
+  system_group_id                                                      Int
+  user_create_id                                                       Int?
+  user_update_id                                                       Int?
+  user_delete_id                                                       Int?
+  created_at                                                           DateTime      @default(now()) @db.DateTime(0)
+  updated_at                                                           DateTime?     @db.DateTime(0)
+  deleted_at                                                           DateTime?     @db.DateTime(0)
+  mural_avisos                                                         mural_avisos  @relation(fields: [mural_avisos_id], references: [id], onUpdate: Restrict, map: "fk_mural_avisos_1")
+  system_group                                                         system_group  @relation(fields: [system_group_id], references: [id], onUpdate: Restrict, map: "fk_system_group_5")
+  system_users_mural_avisos_system_groups_user_create_idTosystem_users system_users? @relation("mural_avisos_system_groups_user_create_idTosystem_users", fields: [user_create_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_system_user_create_2")
+  system_users_mural_avisos_system_groups_user_delete_idTosystem_users system_users? @relation("mural_avisos_system_groups_user_delete_idTosystem_users", fields: [user_delete_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_system_user_delete_4")
+  system_users_mural_avisos_system_groups_user_update_idTosystem_users system_users? @relation("mural_avisos_system_groups_user_update_idTosystem_users", fields: [user_update_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_system_user_update_3")
+
+  @@index([mural_avisos_id], map: "fk_mural_avisos_1")
+  @@index([system_group_id], map: "fk_system_group_5")
+  @@index([user_create_id], map: "fk_system_user_create_2")
+  @@index([user_delete_id], map: "fk_system_user_delete_4")
+  @@index([user_update_id], map: "fk_system_user_update_3")
+}
+
+model parametros {
+  id                                                   BigInt                @id @default(autoincrement())
+  user_update_id                                       Int?
+  user_create_id                                       Int?
+  model                                                String                @db.VarChar(50)
+  descricao                                            String                @db.VarChar(255)
+  chave                                                String                @unique(map: "chave") @db.VarChar(255)
+  valor                                                Bytes?
+  created_at                                           DateTime              @default(now()) @db.DateTime(0)
+  updated_at                                           DateTime?             @db.DateTime(0)
+  deleted_at                                           DateTime?             @db.DateTime(0)
+  user_delete_id                                       Int?
+  nome                                                 String                @db.VarChar(50)
+  codigo                                               String?               @unique(map: "codigo") @db.VarChar(255)
+  importacao_arquivos                                  importacao_arquivos[]
+  system_users_parametros_user_delete_idTosystem_users system_users?         @relation("parametros_user_delete_idTosystem_users", fields: [user_delete_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_parametros_3_1")
+  system_users_parametros_user_create_idTosystem_users system_users?         @relation("parametros_user_create_idTosystem_users", fields: [user_create_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_parametros_user_create_id")
+  system_users_parametros_user_update_idTosystem_users system_users?         @relation("parametros_user_update_idTosystem_users", fields: [user_update_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_parametros_user_update_id")
+
+  @@index([user_delete_id], map: "fk_parametros_3_1")
+  @@index([user_create_id], map: "fk_parametros_user_create_id")
+  @@index([user_update_id], map: "fk_parametros_user_update_id")
+}
+
+model status {
+  id                                               BigInt                      @id @default(autoincrement())
+  user_create_id                                   Int
+  user_update_id                                   Int?
+  user_delete_id                                   Int?
+  titulo                                           String                      @db.VarChar(50)
+  descricao                                        String                      @db.VarChar(255)
+  chave                                            String                      @unique(map: "chave") @db.VarChar(255)
+  model                                            String                      @db.VarChar(128)
+  created_at                                       DateTime                    @default(now()) @db.DateTime(0)
+  updated_at                                       DateTime?                   @db.DateTime(0)
+  deleted_at                                       DateTime?                   @db.DateTime(0)
+  cor_hexa                                         String                      @default("#ffffff") @db.VarChar(7)
+  callback_fila                                    callback_fila[]
+  chamados                                         chamados[]
+  importacao_arquivos                              importacao_arquivos[]
+  importacao_linhas_arquivo                        importacao_linhas_arquivo[]
+  mural_avisos                                     mural_avisos[]
+  system_users_status_user_create_idTosystem_users system_users                @relation("status_user_create_idTosystem_users", fields: [user_create_id], references: [id], onUpdate: Restrict, map: "fk_status_user_create_id")
+  system_users_status_user_delete_idTosystem_users system_users?               @relation("status_user_delete_idTosystem_users", fields: [user_delete_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_status_user_delete_id")
+  system_users_status_user_update_idTosystem_users system_users?               @relation("status_user_update_idTosystem_users", fields: [user_update_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_status_user_update_id")
+
+  @@index([user_create_id], map: "fk_status_user_create_id")
+  @@index([user_delete_id], map: "fk_status_user_delete_id")
+  @@index([user_update_id], map: "fk_status_user_update_id")
+}
+
+model system_document {
+  id                       Int                      @id
+  category_id              Int
+  system_user_id           Int?
+  title                    String                   @db.Text
+  description              String?                  @db.Text
+  submission_date          DateTime?                @db.Date
+  archive_date             DateTime?                @db.Date
+  filename                 String?                  @db.Text
+  system_users             system_users?            @relation(fields: [system_user_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_system_document_1")
+  system_document_category system_document_category @relation(fields: [category_id], references: [id], onUpdate: Restrict, map: "fk_system_document_2")
+  system_document_group    system_document_group[]
+  system_document_user     system_document_user[]
+
+  @@index([system_user_id], map: "fk_system_document_1")
+  @@index([category_id], map: "fk_system_document_2")
+}
+
+model system_document_category {
+  id              Int               @id
+  name            String            @db.Text
+  system_document system_document[]
+}
+
+model system_document_group {
+  id              Int             @id
+  document_id     Int
+  system_group_id Int
+  system_group    system_group    @relation(fields: [system_group_id], references: [id], onUpdate: Restrict, map: "fk_system_document_group_1")
+  system_document system_document @relation(fields: [document_id], references: [id], onUpdate: Restrict, map: "fk_system_document_group_2")
+
+  @@index([system_group_id], map: "fk_system_document_group_1")
+  @@index([document_id], map: "fk_system_document_group_2")
+}
+
+model system_document_user {
+  id              Int             @id
+  document_id     Int
+  system_user_id  Int
+  system_users    system_users    @relation(fields: [system_user_id], references: [id], onUpdate: Restrict, map: "fk_system_document_user_1")
+  system_document system_document @relation(fields: [document_id], references: [id], onUpdate: Restrict, map: "fk_system_document_user_2")
+
+  @@index([system_user_id], map: "fk_system_document_user_1")
+  @@index([document_id], map: "fk_system_document_user_2")
+}
+
+model system_group {
+  id                            Int                             @id
+  name                          String                          @db.Text
+  uuid                          String?                         @db.VarChar(36)
+  chamados                      chamados[]
+  correspondentes_vinculos_user correspondentes_vinculos_user[]
+  importacao_arquivos           importacao_arquivos[]
+  importacao_linhas_arquivo     importacao_linhas_arquivo[]
+  mural_avisos                  mural_avisos[]
+  mural_avisos_system_groups    mural_avisos_system_groups[]
+  system_document_group         system_document_group[]
+  system_group_program          system_group_program[]
+  system_user_group             system_user_group[]
+}
+
+model system_group_program {
+  id                Int            @id
+  system_group_id   Int
+  system_program_id Int
+  system_program    system_program @relation(fields: [system_program_id], references: [id], onUpdate: Restrict, map: "fk_system_group_program_1")
+  system_group      system_group   @relation(fields: [system_group_id], references: [id], onUpdate: Restrict, map: "fk_system_group_program_2")
+
+  @@index([system_program_id], map: "fk_system_group_program_1")
+  @@index([system_group_id], map: "fk_system_group_program_2")
+}
+
+model system_message {
+  id                                                          Int          @id
+  system_user_id                                              Int
+  system_user_to_id                                           Int
+  subject                                                     String       @db.Text
+  message                                                     String?      @db.Text
+  dt_message                                                  DateTime?    @db.DateTime(0)
+  checked                                                     String?      @db.Char(1)
+  system_users_system_message_system_user_idTosystem_users    system_users @relation("system_message_system_user_idTosystem_users", fields: [system_user_id], references: [id], onUpdate: Restrict, map: "fk_system_message_1")
+  system_users_system_message_system_user_to_idTosystem_users system_users @relation("system_message_system_user_to_idTosystem_users", fields: [system_user_to_id], references: [id], onUpdate: Restrict, map: "fk_system_message_2")
+
+  @@index([system_user_id], map: "fk_system_message_1")
+  @@index([system_user_to_id], map: "fk_system_message_2")
+}
+
+model system_notification {
+  id                                                               Int          @id
+  system_user_id                                                   Int
+  system_user_to_id                                                Int
+  subject                                                          String?      @db.Text
+  message                                                          String?      @db.Text
+  dt_message                                                       DateTime?    @db.DateTime(0)
+  action_url                                                       String?      @db.Text
+  action_label                                                     String?      @db.Text
+  icon                                                             String?      @db.Text
+  checked                                                          String?      @db.Char(1)
+  system_users_system_notification_system_user_idTosystem_users    system_users @relation("system_notification_system_user_idTosystem_users", fields: [system_user_id], references: [id], onUpdate: Restrict, map: "fk_system_notification_1")
+  system_users_system_notification_system_user_to_idTosystem_users system_users @relation("system_notification_system_user_to_idTosystem_users", fields: [system_user_to_id], references: [id], onUpdate: Restrict, map: "fk_system_notification_2")
+
+  @@index([system_user_id], map: "fk_system_notification_1")
+  @@index([system_user_to_id], map: "fk_system_notification_2")
+}
+
+model system_preference {
+  id         String  @id @db.VarChar(255)
+  preference String? @db.Text
+}
+
+model system_program {
+  id                   Int                    @id
+  name                 String                 @db.Text
+  controller           String                 @db.Text
+  system_group_program system_group_program[]
+  system_user_program  system_user_program[]
+  system_users         system_users[]
+}
+
+model system_unit {
+  id               Int                @id
+  name             String             @db.Text
+  connection_name  String?            @db.Text
+  system_user_unit system_user_unit[]
+  system_users     system_users[]
+}
+
+model system_user_group {
+  id              Int          @id
+  system_user_id  Int
+  system_group_id Int
+  system_group    system_group @relation(fields: [system_group_id], references: [id], onUpdate: Restrict, map: "fk_system_user_group_1")
+  system_users    system_users @relation(fields: [system_user_id], references: [id], onUpdate: Restrict, map: "fk_system_user_group_2")
+
+  @@index([system_group_id], map: "fk_system_user_group_1")
+  @@index([system_user_id], map: "fk_system_user_group_2")
+}
+
+model system_user_program {
+  id                Int            @id
+  system_user_id    Int
+  system_program_id Int
+  system_program    system_program @relation(fields: [system_program_id], references: [id], onUpdate: Restrict, map: "fk_system_user_program_1")
+  system_users      system_users   @relation(fields: [system_user_id], references: [id], onUpdate: Restrict, map: "fk_system_user_program_2")
+
+  @@index([system_program_id], map: "fk_system_user_program_1")
+  @@index([system_user_id], map: "fk_system_user_program_2")
+}
+
+model system_user_unit {
+  id             Int          @id
+  system_user_id Int
+  system_unit_id Int
+  system_users   system_users @relation(fields: [system_user_id], references: [id], onUpdate: Restrict, map: "fk_system_user_unit_1")
+  system_unit    system_unit  @relation(fields: [system_unit_id], references: [id], onUpdate: Restrict, map: "fk_system_user_unit_2")
+
+  @@index([system_user_id], map: "fk_system_user_unit_1")
+  @@index([system_unit_id], map: "fk_system_user_unit_2")
+}
+
+model system_users {
+  id                                                                                       Int                             @id
+  name                                                                                     String                          @db.Text
+  login                                                                                    String                          @db.Text
+  password                                                                                 String                          @db.Text
+  email                                                                                    String?                         @db.Text
+  frontpage_id                                                                             Int?
+  system_unit_id                                                                           Int?
+  active                                                                                   String?                         @db.Char(1)
+  accepted_term_policy_at                                                                  String?                         @db.Text
+  accepted_term_policy                                                                     String?                         @db.Char(1)
+  created_at                                                                               DateTime                        @default(now()) @db.DateTime(0)
+  updated_at                                                                               DateTime?                       @db.DateTime(0)
+  deleted_at                                                                               DateTime?                       @db.DateTime(0)
+  callback_fila                                                                            callback_fila[]
+  chamados_chamados_user_delete_idTosystem_users                                           chamados[]                      @relation("chamados_user_delete_idTosystem_users")
+  chamados_chamados_solicitante_idTosystem_users                                           chamados[]                      @relation("chamados_solicitante_idTosystem_users")
+  chamados_chamados_user_create_idTosystem_users                                           chamados[]                      @relation("chamados_user_create_idTosystem_users")
+  chamados_chamados_user_update_idTosystem_users                                           chamados[]                      @relation("chamados_user_update_idTosystem_users")
+  chamados_atendentes                                                                      chamados_atendentes[]
+  chamados_notas_chamados_notas_solicitante_idTosystem_users                               chamados_notas[]                @relation("chamados_notas_solicitante_idTosystem_users")
+  chamados_notas_chamados_notas_user_delete_idTosystem_users                               chamados_notas[]                @relation("chamados_notas_user_delete_idTosystem_users")
+  chamados_notas_chamados_notas_user_update_idTosystem_users                               chamados_notas[]                @relation("chamados_notas_user_update_idTosystem_users")
+  chamados_notas_chamados_notas_user_create_idTosystem_users                               chamados_notas[]                @relation("chamados_notas_user_create_idTosystem_users")
+  cidades_cidades_user_create_idTosystem_users                                             cidades[]                       @relation("cidades_user_create_idTosystem_users")
+  cidades_cidades_user_delete_idTosystem_users                                             cidades[]                       @relation("cidades_user_delete_idTosystem_users")
+  cidades_cidades_user_update_idTosystem_users                                             cidades[]                       @relation("cidades_user_update_idTosystem_users")
+  correspondentes_correspondentes_user_create_idTosystem_users                             correspondentes[]               @relation("correspondentes_user_create_idTosystem_users")
+  correspondentes_correspondentes_user_delete_idTosystem_users                             correspondentes[]               @relation("correspondentes_user_delete_idTosystem_users")
+  correspondentes_correspondentes_user_update_idTosystem_users                             correspondentes[]               @relation("correspondentes_user_update_idTosystem_users")
+  correspondentes_vinculos_user_correspondentes_vinculos_user_user_create_idTosystem_users correspondentes_vinculos_user[] @relation("correspondentes_vinculos_user_user_create_idTosystem_users")
+  correspondentes_vinculos_user_correspondentes_vinculos_user_user_delete_idTosystem_users correspondentes_vinculos_user[] @relation("correspondentes_vinculos_user_user_delete_idTosystem_users")
+  correspondentes_vinculos_user_correspondentes_vinculos_user_user_idTosystem_users        correspondentes_vinculos_user?  @relation("correspondentes_vinculos_user_user_idTosystem_users")
+  correspondentes_vinculos_user_correspondentes_vinculos_user_user_update_idTosystem_users correspondentes_vinculos_user[] @relation("correspondentes_vinculos_user_user_update_idTosystem_users")
+  enderecos_enderecos_user_create_idTosystem_users                                         enderecos[]                     @relation("enderecos_user_create_idTosystem_users")
+  enderecos_enderecos_user_delete_idTosystem_users                                         enderecos[]                     @relation("enderecos_user_delete_idTosystem_users")
+  enderecos_enderecos_user_update_idTosystem_users                                         enderecos[]                     @relation("enderecos_user_update_idTosystem_users")
+  importacao_arquivos_importacao_arquivos_user_create_idTosystem_users                     importacao_arquivos[]           @relation("importacao_arquivos_user_create_idTosystem_users")
+  importacao_arquivos_importacao_arquivos_user_update_idTosystem_users                     importacao_arquivos[]           @relation("importacao_arquivos_user_update_idTosystem_users")
+  importacao_linhas_arquivo_importacao_linhas_arquivo_user_create_idTosystem_users         importacao_linhas_arquivo[]     @relation("importacao_linhas_arquivo_user_create_idTosystem_users")
+  importacao_linhas_arquivo_importacao_linhas_arquivo_user_update_idTosystem_users         importacao_linhas_arquivo[]     @relation("importacao_linhas_arquivo_user_update_idTosystem_users")
+  importacao_linhas_inativas_importacao_linhas_inativas_user_create_idTosystem_users       importacao_linhas_inativas[]    @relation("importacao_linhas_inativas_user_create_idTosystem_users")
+  importacao_linhas_inativas_importacao_linhas_inativas_user_update_idTosystem_users       importacao_linhas_inativas[]    @relation("importacao_linhas_inativas_user_update_idTosystem_users")
+  logs_logs_user_delete_idTosystem_users                                                   logs[]                          @relation("logs_user_delete_idTosystem_users")
+  logs_logs_user_create_idTosystem_users                                                   logs[]                          @relation("logs_user_create_idTosystem_users")
+  logs_logs_user_update_idTosystem_users                                                   logs[]                          @relation("logs_user_update_idTosystem_users")
+  mural_avisos                                                                             mural_avisos[]
+  mural_avisos_system_groups_mural_avisos_system_groups_user_create_idTosystem_users       mural_avisos_system_groups[]    @relation("mural_avisos_system_groups_user_create_idTosystem_users")
+  mural_avisos_system_groups_mural_avisos_system_groups_user_delete_idTosystem_users       mural_avisos_system_groups[]    @relation("mural_avisos_system_groups_user_delete_idTosystem_users")
+  mural_avisos_system_groups_mural_avisos_system_groups_user_update_idTosystem_users       mural_avisos_system_groups[]    @relation("mural_avisos_system_groups_user_update_idTosystem_users")
+  parametros_parametros_user_delete_idTosystem_users                                       parametros[]                    @relation("parametros_user_delete_idTosystem_users")
+  parametros_parametros_user_create_idTosystem_users                                       parametros[]                    @relation("parametros_user_create_idTosystem_users")
+  parametros_parametros_user_update_idTosystem_users                                       parametros[]                    @relation("parametros_user_update_idTosystem_users")
+  status_status_user_create_idTosystem_users                                               status[]                        @relation("status_user_create_idTosystem_users")
+  status_status_user_delete_idTosystem_users                                               status[]                        @relation("status_user_delete_idTosystem_users")
+  status_status_user_update_idTosystem_users                                               status[]                        @relation("status_user_update_idTosystem_users")
+  system_document                                                                          system_document[]
+  system_document_user                                                                     system_document_user[]
+  system_message_system_message_system_user_idTosystem_users                               system_message[]                @relation("system_message_system_user_idTosystem_users")
+  system_message_system_message_system_user_to_idTosystem_users                            system_message[]                @relation("system_message_system_user_to_idTosystem_users")
+  system_notification_system_notification_system_user_idTosystem_users                     system_notification[]           @relation("system_notification_system_user_idTosystem_users")
+  system_notification_system_notification_system_user_to_idTosystem_users                  system_notification[]           @relation("system_notification_system_user_to_idTosystem_users")
+  system_user_group                                                                        system_user_group[]
+  system_user_program                                                                      system_user_program[]
+  system_user_unit                                                                         system_user_unit[]
+  system_unit                                                                              system_unit?                    @relation(fields: [system_unit_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_system_user_1")
+  system_program                                                                           system_program?                 @relation(fields: [frontpage_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_system_user_2")
+  ufs_ufs_user_create_idTosystem_users                                                     ufs[]                           @relation("ufs_user_create_idTosystem_users")
+  ufs_ufs_user_delete_idTosystem_users                                                     ufs[]                           @relation("ufs_user_delete_idTosystem_users")
+  ufs_ufs_user_update_idTosystem_users                                                     ufs[]                           @relation("ufs_user_update_idTosystem_users")
+
+  @@index([system_unit_id], map: "fk_system_user_1")
+  @@index([frontpage_id], map: "fk_system_user_2")
+}
+
+model ufs {
+  id                                            BigInt        @id @default(autoincrement())
+  user_create_id                                Int
+  user_update_id                                Int?
+  user_delete_id                                Int?
+  uf                                            String        @db.VarChar(2)
+  nome                                          String        @db.VarChar(50)
+  created_at                                    DateTime      @default(now()) @db.DateTime(0)
+  updated_at                                    DateTime?     @db.DateTime(0)
+  deleted_at                                    DateTime?     @db.DateTime(0)
+  cidades                                       cidades[]
+  enderecos                                     enderecos[]
+  system_users_ufs_user_create_idTosystem_users system_users  @relation("ufs_user_create_idTosystem_users", fields: [user_create_id], references: [id], onUpdate: Restrict, map: "fk_ufs_user_create_id")
+  system_users_ufs_user_delete_idTosystem_users system_users? @relation("ufs_user_delete_idTosystem_users", fields: [user_delete_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_ufs_user_delete_id")
+  system_users_ufs_user_update_idTosystem_users system_users? @relation("ufs_user_update_idTosystem_users", fields: [user_update_id], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "fk_ufs_user_update_id")
+
+  @@index([user_create_id], map: "fk_ufs_user_create_id")
+  @@index([user_delete_id], map: "fk_ufs_user_delete_id")
+  @@index([user_update_id], map: "fk_ufs_user_update_id")
+}
