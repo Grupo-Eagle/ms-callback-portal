@@ -9,12 +9,10 @@ export const procurarLinhasInvalidas = async () => {
   try {
     const linhasArquivosInvalidos = await getLinhasArquivosInvalidos();
     let response: GetErrosArquivoResponse[];
-
     for (const arquivo_id of linhasArquivosInvalidos) {
       response = await getErrosArquivoId(arquivo_id);
       await sendToMsExternal(response, arquivo_id);
     }
-    console.log("teste");
     toInterval();
   } catch (error) {
     throw new LogError({
